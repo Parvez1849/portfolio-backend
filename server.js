@@ -15,17 +15,34 @@ connectDB();
 // Initialize Express app
 const app = express();
 
-// --- CORS Configuration ---
+
+// --- CORS Configuration (Optimized for Production & Local) ---
+// FRONTEND_URL को ट्रिम करें ताकि कोई स्पेस न रहे और यह एक स्ट्रिंग के रूप में हो
+const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.trim() : null;
+
+// Allowed Origins की लिस्ट
 const allowedOrigins = [
-  process.env.FRONTEND_URL, // Your deployed frontend URL (from Vercel Env)
-  'http://localhost:5173'  // Your local frontend development URL
+  'http://localhost:5173', // Local frontend development URL (http)
+  'http://localhost:3000', // Other common local port
 ];
+
+// Production URL जोड़ें, अगर यह सेट है
+if (frontendUrl) {
+    // Netlify हमेशा HTTPS होता है, इसलिए HTTPS URL जोड़ना ज़रूरी है
+    allowedOrigins.push(frontendUrl);
+    // यह सुनिश्चित करने के लिए कि WWW और NON-WWW दोनों काम करें, एक और संभावित डोमेन भी जोड़ सकते हैं
+    // जैसे: 'https://www.netlify.app'
+}
+
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    // origin undefined होता है जब यह local/server-to-server call होती है (जैसे Postman)
+    // या जब यह Allowed Origins में हो
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      // console.error(`CORS Blocked: Request from ${origin} not allowed.`);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -46,19 +63,17 @@ app.use('/api/auth', authRoutes);          // Handle authentication routes
 
 
 // Vercel Serverless Export:
-// Vercel is file ko import karke app instance leta hai.
 module.exports = app; 
 
 
 // --- Local Server Setup (Conditional Listening) ---
-// Yeh check karta hai ki kya file seedhe 'node server.js' se run ho rahi hai.
 if (require.main === module) {
-    // Get port from environment variable or use 5001 as default
-    const PORT = process.env.PORT || 5001;
+    // Get port from environment variable or use 5001 as default
+    const PORT = process.env.PORT || 5001;
 
-    // Start the server ONLY if it's running locally
-    app.listen(PORT, () => {
-        console.log(`✅ Server is running locally on http://localhost:${PORT}`);
-    });
+    // Start the server ONLY if it's running locally
+    app.listen(PORT, () => {
+        console.log(`✅ Server is running locally on http://localhost:${PORT}`);
+    });
 }
 // --- End Local Server Setup ---
