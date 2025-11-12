@@ -8,7 +8,6 @@ exports.protect = async (req, res, next) => {
     token = req.headers.authorization.split(' ')[1];
 
     try {
-      // --- YAHI SAHI CODE HAI ---
       // Token ko Firebase se verify karein
       const decodedToken = await admin.auth().verifyIdToken(token);
 
@@ -17,21 +16,19 @@ exports.protect = async (req, res, next) => {
         id: decodedToken.uid,
         email: decodedToken.email,
       };
-      // --- END ---
-
+      
+      // Agar sab sahi hai, toh agle step (controller) par jaane dein
       return next();
+
     } catch (error) {
+      // Agar token galat hai (expired, ya verify nahi hua)
       console.error("Firebase token verification failed:", error.message);
       return res.status(401).json({ message: "Not authorized, token failed" });
     }
   }
 
   if (!token) {
+    // Agar token header mein hai hi nahi
     return res.status(401).json({ message: "Not authorized, no token" });
   }
-};
-
-  if (!token) {
-    return res.status(401).json({ message: "Not authorized, no token" });
-  }
 };
