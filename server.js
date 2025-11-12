@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const portfolioRoutes = require('./routes/portfolio.routes');
-const admin = require('./config/firebaseAdmin'); // ✅ firebaseAdmin.js import
+const admin = require('./config/firebaseAdmin'); // ✅ updated
 
 // ----------------------------
 // Connect MongoDB
@@ -19,7 +19,7 @@ const app = express();
 // CORS Configuration
 // ----------------------------
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5173',
+  process.env.FRONTEND_URL,
   'http://localhost:3000',
 ];
 
